@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
+import { noteSchema } from "@/lib/validations";
 
 interface Note {
   id: string;
@@ -56,49 +57,51 @@ export default function Notes() {
   };
 
   const saveNote = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    if (isEditing && selectedNote) {
-      const { error } = await supabase
-        .from("user_notes")
-        .update({ title: noteTitle, content: noteContent })
-        .eq("id", selectedNote.id);
-
-      if (error) {
-        toast({
-          title: "Error updating note",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({ title: "Note updated! 📝" });
-        fetchNotes();
-      }
-    } else {
-      const { error } = await supabase.from("user_notes").insert({
-        user_id: user.id,
-        title: noteTitle,
-        content: noteContent,
+    try {
+      // Validate inputs
+      const validatedData = noteSchema.parse({
+        title: noteTitle.trim(),
+        content: noteContent.trim(),
       });
 
-      if (error) {
-        toast({
-          title: "Error saving note",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({ title: "Note saved! 📝" });
-        fetchNotes();
-      }
-    }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    setIsDialogOpen(false);
-    setNoteTitle("");
-    setNoteContent("");
-    setIsEditing(false);
-    setSelectedNote(null);
+      if (isEditing && selectedNote) {
+        const { error } = await supabase
+          .from("user_notes")
+          .update({ 
+            title: validatedData.title, 
+            content: validatedData.content 
+          })
+          .eq("id", selectedNote.id);
+
+        if (error) throw error;
+        toast({ title: "Note updated! 📝" });
+      } else {
+        const { error } = await supabase.from("user_notes").insert({
+          user_id: user.id,
+          title: validatedData.title,
+          content: validatedData.content,
+        });
+
+        if (error) throw error;
+        toast({ title: "Note saved! 📝" });
+      }
+
+      setIsDialogOpen(false);
+      setNoteTitle("");
+      setNoteContent("");
+      setIsEditing(false);
+      setSelectedNote(null);
+      fetchNotes();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.errors?.[0]?.message || error.message || "Please check your inputs",
+        variant: "destructive",
+      });
+    }
   };
 
   const deleteNote = async (id: string) => {

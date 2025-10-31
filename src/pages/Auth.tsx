@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { signUpSchema, signInSchema } from "@/lib/validations";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -39,56 +40,73 @@ export default function Auth() {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/learn`,
-        data: {
-          full_name: fullName,
-        },
-      },
-    });
-
-    if (error) {
-      toast({
-        title: "Signup failed",
-        description: error.message,
-        variant: "destructive",
+    try {
+      // Validate inputs
+      const validatedData = signUpSchema.parse({
+        email: email.trim(),
+        password,
+        fullName: fullName.trim(),
       });
-    } else {
+
+      const { error } = await supabase.auth.signUp({
+        email: validatedData.email,
+        password: validatedData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/learn`,
+          data: {
+            full_name: validatedData.fullName,
+          },
+        },
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Welcome to ProgramBharat! 🎉",
         description: "Your account has been created successfully.",
       });
+    } catch (error: any) {
+      toast({
+        title: "Signup failed",
+        description: error.errors?.[0]?.message || error.message || "Please check your inputs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      toast({
-        title: "Login failed",
-        description: error.message,
-        variant: "destructive",
+    try {
+      // Validate inputs
+      const validatedData = signInSchema.parse({
+        email: email.trim(),
+        password,
       });
-    } else {
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email: validatedData.email,
+        password: validatedData.password,
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Welcome back! 👋",
         description: "Successfully logged in.",
       });
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.errors?.[0]?.message || error.message || "Please check your inputs",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   return (
@@ -189,9 +207,12 @@ export default function Auth() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      minLength={6}
+                      minLength={8}
                       className="bg-input"
                     />
+                    <p className="text-xs text-muted-foreground">
+                      At least 8 characters with uppercase, lowercase, and number
+                    </p>
                   </div>
                   <Button
                     type="submit"

@@ -6,6 +6,7 @@ import { Play, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { FileTree, FileNode } from "@/components/FileTree";
+import { projectSchema } from "@/lib/validations";
 
 const defaultFiles: FileNode[] = [
   {
@@ -155,33 +156,44 @@ export default function EditorPage() {
   };
 
   const saveProject = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "Please sign in",
-        description: "You need to be signed in to save projects",
-        variant: "destructive",
-      });
-      return;
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "Please sign in",
+          description: "You need to be signed in to save projects",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    const { error } = await supabase.from("user_codes").insert({
-      user_id: user.id,
-      title: `Project - ${new Date().toLocaleDateString()}`,
-      code: JSON.stringify(files),
-      language: "project",
-    });
+      const projectData = JSON.stringify(files);
+      const title = `Project - ${new Date().toLocaleDateString()}`;
 
-    if (error) {
-      toast({
-        title: "Save failed",
-        description: error.message,
-        variant: "destructive",
+      // Validate project data
+      projectSchema.parse({
+        title,
+        code: projectData,
       });
-    } else {
+
+      const { error } = await supabase.from("user_codes").insert({
+        user_id: user.id,
+        title: title.substring(0, 100),
+        code: projectData.substring(0, 100000),
+        language: "project",
+      });
+
+      if (error) throw error;
+
       toast({
         title: "Project saved! 💾",
         description: "Your project has been saved successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Save failed",
+        description: error.errors?.[0]?.message || error.message || "Please check your inputs",
+        variant: "destructive",
       });
     }
   };
