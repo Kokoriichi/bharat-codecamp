@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      cheatsheets: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          language: string
+          thumbnail_url: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          language?: string
+          thumbnail_url?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          language?: string
+          thumbnail_url?: string | null
+          title?: string
+          url?: string
+        }
+        Relationships: []
+      }
       lessons: {
         Row: {
           cheatsheet_url: string | null

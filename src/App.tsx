@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Auth from "./pages/Auth";
 import Learn from "./pages/Learn";
 import Editor from "./pages/Editor";
+import Cheatsheet from "./pages/Cheatsheet";
 import Notes from "./pages/Notes";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";

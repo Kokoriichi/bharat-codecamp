@@ -1,4 +1,4 @@
-import { BookOpen, Code2, FileText, User, LogOut } from "lucide-react";
+import { BookOpen, Code2, FileText, User, LogOut, FileCode } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 const menuItems = [
   { title: "Learn", url: "/learn", icon: BookOpen },
   { title: "Code Editor", url: "/editor", icon: Code2 },
+  { title: "Cheatsheets", url: "/cheatsheet", icon: FileCode },
   { title: "My Notes", url: "/notes", icon: FileText },
   { title: "Profile", url: "/profile", icon: User },
 ];
