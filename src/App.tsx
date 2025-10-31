@@ -60,10 +60,11 @@ const App = () => {
                   </header>
                   <main className="flex-1 overflow-auto">
                     <Routes>
-                      <Route path="/learn" element={<Learn />} />
-                      <Route path="/editor" element={<Editor />} />
-                      <Route path="/notes" element={<Notes />} />
-                      <Route path="/profile" element={<Profile />} />
+              <Route path="/learn" element={<Learn />} />
+              <Route path="/editor" element={<Editor />} />
+              <Route path="/cheatsheet" element={<Cheatsheet />} />
+              <Route path="/notes" element={<Notes />} />
+              <Route path="/profile" element={<Profile />} />
                       <Route path="/" element={<Navigate to="/learn" replace />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>

@@ -19,6 +19,14 @@ serve(async (req) => {
       javascript: 63,
       cpp: 54,
       java: 62,
+      c: 50,
+      csharp: 51,
+      ruby: 72,
+      go: 60,
+      rust: 73,
+      php: 68,
+      swift: 83,
+      kotlin: 78,
     };
 
     const response = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {

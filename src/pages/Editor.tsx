@@ -12,6 +12,14 @@ const languageOptions = [
   { value: "javascript", label: "JavaScript", default: "// Write your JavaScript code here\nconsole.log('Hello, Bharat!');" },
   { value: "cpp", label: "C++", default: "// Write your C++ code here\n#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << \"Hello, Bharat!\" << endl;\n    return 0;\n}" },
   { value: "java", label: "Java", default: "// Write your Java code here\npublic class Main {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, Bharat!\");\n    }\n}" },
+  { value: "c", label: "C", default: "// Write your C code here\n#include <stdio.h>\n\nint main() {\n    printf(\"Hello, Bharat!\\n\");\n    return 0;\n}" },
+  { value: "csharp", label: "C#", default: "// Write your C# code here\nusing System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine(\"Hello, Bharat!\");\n    }\n}" },
+  { value: "ruby", label: "Ruby", default: "# Write your Ruby code here\nputs 'Hello, Bharat!'" },
+  { value: "go", label: "Go", default: "// Write your Go code here\npackage main\nimport \"fmt\"\n\nfunc main() {\n    fmt.Println(\"Hello, Bharat!\")\n}" },
+  { value: "rust", label: "Rust", default: "// Write your Rust code here\nfn main() {\n    println!(\"Hello, Bharat!\");\n}" },
+  { value: "php", label: "PHP", default: "<?php\n// Write your PHP code here\necho \"Hello, Bharat!\";\n?>" },
+  { value: "swift", label: "Swift", default: "// Write your Swift code here\nimport Swift\nprint(\"Hello, Bharat!\")" },
+  { value: "kotlin", label: "Kotlin", default: "// Write your Kotlin code here\nfun main() {\n    println(\"Hello, Bharat!\")\n}" },
 ];
 
 export default function EditorPage() {
