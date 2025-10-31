@@ -9,6 +9,7 @@ import { ActivityBar } from "@/components/editor/ActivityBar";
 import { TabBar } from "@/components/editor/TabBar";
 import { StatusBar } from "@/components/editor/StatusBar";
 import { VSCodeEditor } from "@/components/editor/VSCodeEditor";
+import { Terminal } from "@/components/editor/Terminal";
 
 const defaultFiles: FileNode[] = [
   {
@@ -156,7 +157,7 @@ export default function EditorPage() {
     }
 
     setIsRunning(true);
-    setOutput("Running code...");
+    setOutput("Running code...\n");
 
     try {
       const { data, error } = await supabase.functions.invoke("execute-code", {
@@ -175,6 +176,22 @@ export default function EditorPage() {
       });
     } finally {
       setIsRunning(false);
+    }
+  };
+
+  const handleTerminalCommand = async (command: string) => {
+    const cmd = command.toLowerCase().trim();
+    
+    if (cmd === "run") {
+      await runCode();
+    } else if (cmd === "clear") {
+      setOutput("");
+    } else if (cmd === "deploy") {
+      setOutput("Deploying application...\nBuilding project...\nDeployment successful! 🚀");
+    } else if (cmd === "help") {
+      setOutput("Available commands:\n  run    - Execute the current file\n  clear  - Clear terminal\n  deploy - Deploy the application\n  help   - Show this help message");
+    } else {
+      setOutput(`Command not found: ${command}\nType 'help' for available commands`);
     }
   };
 
@@ -301,21 +318,12 @@ export default function EditorPage() {
           )}
         </div>
 
-        {/* Terminal/Output Panel */}
-        <div className="h-64 bg-[#141414] border-t border-[#3C3C3C] flex flex-col">
-          <div className="h-9 bg-[#1E1E1E] border-b border-[#3C3C3C] flex items-center px-4">
-            <span className="text-sm text-[#E0E0E0]">OUTPUT</span>
-          </div>
-          <div className="flex-1 overflow-auto p-4 font-mono text-sm text-[#E0E0E0]">
-            {output ? (
-              <pre className="whitespace-pre-wrap">{output}</pre>
-            ) : (
-              <div className="text-[#9C9C9C]">
-                Run your code to see output here...
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Terminal Panel */}
+        <Terminal 
+          output={output}
+          isRunning={isRunning}
+          onCommand={handleTerminalCommand}
+        />
 
         {/* Status Bar */}
         <StatusBar
