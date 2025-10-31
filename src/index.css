@@ -18,8 +18,8 @@ All colors MUST be HSL.
     --popover: 0 0% 13.7%;
     --popover-foreground: 0 0% 87.8%;
 
-    /* Orange accent - ProgramBharat brand */
-    --primary: 30 100% 50%; /* #FFA500 - Orange */
+    /* Purple accent - ProgramBharat brand */
+    --primary: 270 70% 60%; /* Purple */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 19.6%; /* #323233 */
@@ -28,7 +28,7 @@ All colors MUST be HSL.
     --muted: 0 0% 19.6%;
     --muted-foreground: 0 0% 61%; /* #9C9C9C */
 
-    --accent: 30 100% 50%; /* Orange accent */
+    --accent: 270 70% 60%; /* Purple accent */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -36,19 +36,19 @@ All colors MUST be HSL.
 
     --border: 0 0% 23.5%; /* #3C3C3C */
     --input: 0 0% 19.6%;
-    --ring: 30 100% 50%;
+    --ring: 270 70% 60%;
 
     --radius: 0.5rem;
 
     /* Sidebar - darker tone */
     --sidebar-background: 0 0% 9.8%; /* #181818 */
     --sidebar-foreground: 0 0% 87.8%;
-    --sidebar-primary: 30 100% 50%;
+    --sidebar-primary: 270 70% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 15.7%; /* #282828 */
     --sidebar-accent-foreground: 0 0% 87.8%;
     --sidebar-border: 0 0% 19.6%;
-    --sidebar-ring: 30 100% 50%;
+    --sidebar-ring: 270 70% 60%;
 
     /* Success color for streaks/badges */
     --success: 142 76% 36%;
