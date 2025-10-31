@@ -77,24 +77,24 @@ export function FileTree({
     const isSelected = node.id === selectedFileId;
 
     return (
-      <div key={node.id}>
+      <div key={node.id} className="group">
         <div
-          className={`flex items-center gap-1 px-2 py-1 hover:bg-accent cursor-pointer ${
-            isSelected ? "bg-accent" : ""
+          className={`flex items-center gap-1 px-2 py-1 hover:bg-[#2A2A2A] cursor-pointer ${
+            isSelected ? "bg-[#2A2A2A]" : ""
           }`}
           style={{ paddingLeft: `${depth * 12 + 8}px` }}
         >
           {node.type === "folder" ? (
             <>
-              <button onClick={() => toggleFolder(node.id)} className="p-0 h-4 w-4">
+              <button onClick={() => toggleFolder(node.id)} className="p-0 h-4 w-4 text-[#E0E0E0]">
                 {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
               </button>
-              {isExpanded ? <FolderOpen className="h-4 w-4" /> : <Folder className="h-4 w-4" />}
-              <span className="flex-1 text-sm" onClick={() => toggleFolder(node.id)}>{node.name}</span>
+              {isExpanded ? <FolderOpen className="h-4 w-4 text-[#DCBE61]" /> : <Folder className="h-4 w-4 text-[#DCBE61]" />}
+              <span className="flex-1 text-sm text-[#E0E0E0]" onClick={() => toggleFolder(node.id)}>{node.name}</span>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-6 w-6"
+                className="h-6 w-6 hover:bg-[#3C3C3C] text-[#E0E0E0] opacity-0 group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   startCreating(node.id, "file");
@@ -105,7 +105,7 @@ export function FileTree({
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-6 w-6"
+                className="h-6 w-6 hover:bg-[#3C3C3C] text-[#E0E0E0] opacity-0 group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDeleteNode(node.id);
@@ -116,12 +116,12 @@ export function FileTree({
             </>
           ) : (
             <>
-              <File className="h-4 w-4 ml-4" />
-              <span className="flex-1 text-sm" onClick={() => onFileSelect(node)}>{node.name}</span>
+              <File className="h-4 w-4 ml-4 text-[#9C9C9C]" />
+              <span className="flex-1 text-sm text-[#E0E0E0]" onClick={() => onFileSelect(node)}>{node.name}</span>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-6 w-6"
+                className="h-6 w-6 hover:bg-[#3C3C3C] text-[#E0E0E0] opacity-0 group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDeleteNode(node.id);
@@ -149,7 +149,7 @@ export function FileTree({
                     }
                   }}
                   placeholder={creatingType === "file" ? "filename.ext" : "folder-name"}
-                  className="h-6 text-sm"
+                  className="h-6 text-sm bg-[#1E1E1E] border-[#3C3C3C] text-[#E0E0E0]"
                   autoFocus
                 />
               </div>
@@ -161,14 +161,14 @@ export function FileTree({
   };
 
   return (
-    <div className="h-full flex flex-col bg-card border-r border-border">
-      <div className="p-2 border-b border-border flex items-center justify-between">
-        <span className="text-sm font-semibold">Explorer</span>
+    <div className="h-full flex flex-col bg-[#252526] border-r border-[#3C3C3C]">
+      <div className="p-2 border-b border-[#3C3C3C] flex items-center justify-between">
+        <span className="text-sm font-semibold text-[#E0E0E0]">EXPLORER</span>
         <div className="flex gap-1">
           <Button
             size="icon"
             variant="ghost"
-            className="h-6 w-6"
+            className="h-6 w-6 hover:bg-[#2A2A2A] text-[#E0E0E0]"
             onClick={() => startCreating(null, "file")}
             title="New File"
           >
@@ -177,7 +177,7 @@ export function FileTree({
           <Button
             size="icon"
             variant="ghost"
-            className="h-6 w-6"
+            className="h-6 w-6 hover:bg-[#2A2A2A] text-[#E0E0E0]"
             onClick={() => startCreating(null, "folder")}
             title="New Folder"
           >
@@ -201,7 +201,7 @@ export function FileTree({
                   }
                 }}
                 placeholder={creatingType === "file" ? "filename.ext" : "folder-name"}
-                className="h-6 text-sm"
+                className="h-6 text-sm bg-[#1E1E1E] border-[#3C3C3C] text-[#E0E0E0]"
                 autoFocus
               />
             </div>
