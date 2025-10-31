@@ -21,7 +21,7 @@ const menuItems = [
   { title: "Learn", url: "/learn", icon: BookOpen },
   { title: "Code Editor", url: "/editor", icon: Code2 },
   { title: "Cheatsheets", url: "/cheatsheet", icon: FileCode },
-  { title: "My Notes", url: "/notes", icon: FileText },
+  { title: "Notes", url: "/notes", icon: FileText },
   { title: "Profile", url: "/profile", icon: User },
 ];
 
