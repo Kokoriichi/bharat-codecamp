@@ -8,7 +8,7 @@ import { projectSchema } from "@/lib/validations";
 import { ActivityBar } from "@/components/editor/ActivityBar";
 import { TabBar } from "@/components/editor/TabBar";
 import { StatusBar } from "@/components/editor/StatusBar";
-import { VSCodeEditor } from "@/components/editor/VSCodeEditor";
+
 import { Terminal } from "@/components/editor/Terminal";
 import { SearchPanel } from "@/components/editor/SearchPanel";
 import { GitPanel } from "@/components/editor/GitPanel";
@@ -398,22 +398,12 @@ export default function EditorPage() {
             />
           )}
           
-          {selectedFile?.type === "file" ? (
-            <VSCodeEditor
-              value={selectedFile.content || ""}
-              language={selectedFile.language || "plaintext"}
-              onChange={handleCodeChange}
-              onCursorChange={(line, column) => setCursorPosition({ line, column })}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center text-[#9C9C9C] bg-[#1E1E1E]">
-              <div className="text-center">
-                <div className="text-6xl mb-4">👨‍💻</div>
-                <div className="text-xl mb-2">No file selected</div>
-                <div className="text-sm">Open a file from the Explorer to start coding</div>
-              </div>
-            </div>
-          )}
+          <iframe
+            src="https://vscode.dev/"
+            className="w-full h-full border-0"
+            title="VS Code Editor"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+          />
         </div>
 
         {/* Terminal Panel */}
