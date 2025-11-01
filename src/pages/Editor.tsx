@@ -10,6 +10,10 @@ import { TabBar } from "@/components/editor/TabBar";
 import { StatusBar } from "@/components/editor/StatusBar";
 import { VSCodeEditor } from "@/components/editor/VSCodeEditor";
 import { Terminal } from "@/components/editor/Terminal";
+import { SearchPanel } from "@/components/editor/SearchPanel";
+import { GitPanel } from "@/components/editor/GitPanel";
+import { RunPanel } from "@/components/editor/RunPanel";
+import { AIAssistant } from "@/components/editor/AIAssistant";
 
 const defaultFiles: FileNode[] = [
   {
@@ -257,8 +261,24 @@ export default function EditorPage() {
         </div>
       )}
 
+      {activeView === "search" && (
+        <SearchPanel onSearch={(query, options) => {
+          toast({
+            title: "Search",
+            description: `Searching for: ${query}`,
+          });
+        }} />
+      )}
+
+      {activeView === "git" && <GitPanel />}
+
+      {activeView === "run" && (
+        <RunPanel onRun={runCode} isRunning={isRunning} />
+      )}
+
       {/* Main Editor Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Toolbar */}
         <div className="h-9 bg-[#252526] border-b border-[#3C3C3C] flex items-center justify-between px-4">
           <div className="text-sm text-[#E0E0E0]">
@@ -325,13 +345,24 @@ export default function EditorPage() {
           onCommand={handleTerminalCommand}
         />
 
-        {/* Status Bar */}
-        <StatusBar
-          language={selectedFile?.language}
-          lineNumber={cursorPosition.line}
-          columnNumber={cursorPosition.column}
-          isRunning={isRunning}
-        />
+          {/* Status Bar */}
+          <StatusBar
+            language={selectedFile?.language}
+            lineNumber={cursorPosition.line}
+            columnNumber={cursorPosition.column}
+            isRunning={isRunning}
+          />
+        </div>
+
+        {/* AI Assistant */}
+        {activeView === "ai" && (
+          <div className="w-96">
+            <AIAssistant
+              currentCode={selectedFile?.content}
+              language={selectedFile?.language}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

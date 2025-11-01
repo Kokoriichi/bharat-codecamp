@@ -1,4 +1,4 @@
-import { Files, Search, GitBranch, Play, Settings } from "lucide-react";
+import { Files, Search, GitBranch, Play, Settings, Bot } from "lucide-react";
 
 interface ActivityBarProps {
   activeView: string;
@@ -11,6 +11,7 @@ export function ActivityBar({ activeView, onViewChange }: ActivityBarProps) {
     { id: "search", icon: Search, label: "Search" },
     { id: "git", icon: GitBranch, label: "Source Control" },
     { id: "run", icon: Play, label: "Run and Debug" },
+    { id: "ai", icon: Bot, label: "AI Assistant" },
   ];
 
   return (
