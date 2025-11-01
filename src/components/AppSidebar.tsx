@@ -14,7 +14,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useClerk } from "@clerk/clerk-react";
 import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
@@ -29,14 +29,15 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signOut } = useClerk();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     toast({
       title: "Logged out successfully",
       description: "See you soon!",
     });
-    navigate("/auth");
+    navigate("/");
   };
 
   const collapsed = state === "collapsed";

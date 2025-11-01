@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { User, Flame, BookOpen, FileText, Trophy, Award } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useUser } from "@clerk/clerk-react";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
@@ -10,6 +10,12 @@ interface Profile {
   full_name: string;
   email: string;
   avatar_url: string;
+  daily_streak: number;
+  total_lessons_completed: number;
+  total_notes: number;
+}
+
+interface UserStats {
   daily_streak: number;
   total_lessons_completed: number;
   total_notes: number;
@@ -23,94 +29,61 @@ interface Achievement {
 }
 
 export default function Profile() {
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user } = useUser();
+  const [stats, setStats] = useState<UserStats>({
+    daily_streak: 0,
+    total_lessons_completed: 0,
+    total_notes: 0,
+  });
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: profileData, error: profileError } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError) {
-      toast({
-        title: "Error loading profile",
-        description: profileError.message,
-        variant: "destructive",
-      });
-      return;
+    if (user) {
+      // You can fetch user stats from your backend here if needed
+      // For now, showing mock data
+      generateAchievements(stats);
     }
+  }, [user]);
 
-    // Count lessons completed
-    const { count: lessonsCount } = await supabase
-      .from("user_progress")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("completed", true);
-
-    // Count notes
-    const { count: notesCount } = await supabase
-      .from("user_notes")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id);
-
-    const updatedProfile = {
-      ...profileData,
-      total_lessons_completed: lessonsCount || 0,
-      total_notes: notesCount || 0,
-    };
-
-    setProfile(updatedProfile);
-    generateAchievements(updatedProfile);
-  };
-
-  const generateAchievements = (profile: Profile) => {
+  const generateAchievements = (stats: UserStats) => {
     const achievementsList: Achievement[] = [
       {
         icon: <Award className="h-6 w-6" />,
         title: "First Steps",
         description: "Complete your first lesson",
-        unlocked: profile.total_lessons_completed >= 1,
+        unlocked: stats.total_lessons_completed >= 1,
       },
       {
         icon: <Flame className="h-6 w-6" />,
         title: "Week Warrior",
         description: "Maintain a 7-day streak",
-        unlocked: profile.daily_streak >= 7,
+        unlocked: stats.daily_streak >= 7,
       },
       {
         icon: <BookOpen className="h-6 w-6" />,
         title: "Knowledge Seeker",
         description: "Complete 10 lessons",
-        unlocked: profile.total_lessons_completed >= 10,
+        unlocked: stats.total_lessons_completed >= 10,
       },
       {
         icon: <FileText className="h-6 w-6" />,
         title: "Note Taker",
         description: "Create 5 notes",
-        unlocked: profile.total_notes >= 5,
+        unlocked: stats.total_notes >= 5,
       },
       {
         icon: <Trophy className="h-6 w-6" />,
         title: "Dedicated Learner",
         description: "Maintain a 30-day streak",
-        unlocked: profile.daily_streak >= 30,
+        unlocked: stats.daily_streak >= 30,
       },
     ];
 
     setAchievements(achievementsList);
   };
 
-  if (!profile) {
+  if (!user) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
@@ -134,12 +107,16 @@ export default function Profile() {
       >
         <Card className="border-border">
           <CardHeader className="flex flex-row items-center gap-4">
-            <div className="h-20 w-20 rounded-full bg-primary/20 flex items-center justify-center">
-              <User className="h-10 w-10 text-primary" />
+            <div className="h-20 w-20 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+              {user.imageUrl ? (
+                <img src={user.imageUrl} alt="Profile" className="h-full w-full object-cover" />
+              ) : (
+                <User className="h-10 w-10 text-primary" />
+              )}
             </div>
             <div>
-              <CardTitle className="text-2xl">{profile.full_name || "User"}</CardTitle>
-              <CardDescription>{profile.email}</CardDescription>
+              <CardTitle className="text-2xl">{user.fullName || user.username || "User"}</CardTitle>
+              <CardDescription>{user.primaryEmailAddress?.emailAddress}</CardDescription>
             </div>
           </CardHeader>
         </Card>
@@ -159,7 +136,7 @@ export default function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{profile.daily_streak}</div>
+              <div className="text-4xl font-bold">{stats.daily_streak}</div>
               <p className="text-sm text-muted-foreground">days in a row</p>
             </CardContent>
           </Card>
@@ -178,7 +155,7 @@ export default function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{profile.total_lessons_completed}</div>
+              <div className="text-4xl font-bold">{stats.total_lessons_completed}</div>
               <p className="text-sm text-muted-foreground">lessons mastered</p>
             </CardContent>
           </Card>
@@ -197,7 +174,7 @@ export default function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold">{profile.total_notes}</div>
+              <div className="text-4xl font-bold">{stats.total_notes}</div>
               <p className="text-sm text-muted-foreground">notes written</p>
             </CardContent>
           </Card>
