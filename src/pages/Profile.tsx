@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { User, Flame, BookOpen, FileText, Trophy, Award } from "lucide-react";
-import { useUser } from "@clerk/clerk-react";
+import { User as UserIcon, Flame, BookOpen, FileText, Trophy, Award } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
@@ -29,7 +30,8 @@ interface Achievement {
 }
 
 export default function Profile() {
-  const { user } = useUser();
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [stats, setStats] = useState<UserStats>({
     daily_streak: 0,
     total_lessons_completed: 0,
@@ -39,12 +41,50 @@ export default function Profile() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      // You can fetch user stats from your backend here if needed
-      // For now, showing mock data
-      generateAchievements(stats);
+    fetchUserAndProfile();
+  }, []);
+
+  useEffect(() => {
+    if (profile) {
+      setStats({
+        daily_streak: profile.daily_streak,
+        total_lessons_completed: profile.total_lessons_completed,
+        total_notes: profile.total_notes,
+      });
+      generateAchievements({
+        daily_streak: profile.daily_streak,
+        total_lessons_completed: profile.total_lessons_completed,
+        total_notes: profile.total_notes,
+      });
     }
-  }, [user]);
+  }, [profile]);
+
+  const fetchUserAndProfile = async () => {
+    try {
+      const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!currentUser) return;
+
+      setUser(currentUser);
+
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        console.error('Error fetching profile:', profileError);
+        return;
+      }
+
+      if (profileData) {
+        setProfile(profileData);
+      }
+    } catch (error: any) {
+      console.error('Error in fetchUserAndProfile:', error);
+    }
+  };
 
   const generateAchievements = (stats: UserStats) => {
     const achievementsList: Achievement[] = [
@@ -83,7 +123,7 @@ export default function Profile() {
     setAchievements(achievementsList);
   };
 
-  if (!user) {
+  if (!user || !profile) {
     return (
       <div className="p-6">
         <div className="animate-pulse space-y-4">
@@ -97,7 +137,7 @@ export default function Profile() {
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-bold flex items-center gap-2">
-        <User className="h-8 w-8 text-primary" />
+        <UserIcon className="h-8 w-8 text-primary" />
         My Profile
       </h1>
 
@@ -108,15 +148,15 @@ export default function Profile() {
         <Card className="border-border">
           <CardHeader className="flex flex-row items-center gap-4">
             <div className="h-20 w-20 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
-              {user.imageUrl ? (
-                <img src={user.imageUrl} alt="Profile" className="h-full w-full object-cover" />
+              {profile.avatar_url ? (
+                <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
               ) : (
-                <User className="h-10 w-10 text-primary" />
+                <UserIcon className="h-10 w-10 text-primary" />
               )}
             </div>
             <div>
-              <CardTitle className="text-2xl">{user.fullName || user.username || "User"}</CardTitle>
-              <CardDescription>{user.primaryEmailAddress?.emailAddress}</CardDescription>
+              <CardTitle className="text-2xl">{profile.full_name || "User"}</CardTitle>
+              <CardDescription>{profile.email || user.email}</CardDescription>
             </div>
           </CardHeader>
         </Card>
