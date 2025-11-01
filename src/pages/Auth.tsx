@@ -90,7 +90,7 @@ export default function Auth() {
           <div className="flex justify-center mb-4">
             <Code2 className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl">CodeLearn</CardTitle>
+          <CardTitle className="text-2xl">ProgramBharat</CardTitle>
           <CardDescription>
             {isLogin ? "Welcome back! Sign in to continue" : "Create your account to get started"}
           </CardDescription>
