@@ -22,41 +22,47 @@ serve(async (req) => {
 
     const { code, language } = await req.json();
 
-    // Language ID mapping for Judge0
-    const languageIds: Record<string, number> = {
-      python: 71,
-      javascript: 63,
-      cpp: 54,
-      java: 62,
-      c: 50,
-      csharp: 51,
-      ruby: 72,
-      go: 60,
-      rust: 73,
-      php: 68,
-      swift: 83,
-      kotlin: 78,
+    // Use Piston API which has better library support
+    const languageMap: Record<string, string> = {
+      python: 'python',
+      javascript: 'javascript',
+      cpp: 'c++',
+      java: 'java',
+      c: 'c',
+      csharp: 'csharp',
+      ruby: 'ruby',
+      go: 'go',
+      rust: 'rust',
+      php: 'php',
+      swift: 'swift',
+      kotlin: 'kotlin',
+      typescript: 'typescript',
     };
 
-    const response = await fetch('https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true', {
+    const response = await fetch('https://emkc.org/api/v2/piston/execute', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-RapidAPI-Key': Deno.env.get('JUDGE0_API_KEY') || '',
-        'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com',
       },
       body: JSON.stringify({
-        source_code: code,
-        language_id: languageIds[language] || 71,
+        language: languageMap[language] || 'python',
+        version: '*',
+        files: [{
+          name: 'main',
+          content: code,
+        }],
       }),
     });
 
     const result = await response.json();
 
+    const output = result.run?.output || result.compile?.output || 'No output';
+    const error = result.run?.stderr || result.compile?.stderr || null;
+
     return new Response(
       JSON.stringify({
-        output: result.stdout || result.stderr || result.compile_output || 'No output',
-        error: result.status?.description !== 'Accepted' ? result.stderr : null,
+        output: output,
+        error: error,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
