@@ -8,7 +8,7 @@ import { projectSchema } from "@/lib/validations";
 import { ActivityBar } from "@/components/editor/ActivityBar";
 import { TabBar } from "@/components/editor/TabBar";
 import { StatusBar } from "@/components/editor/StatusBar";
-
+import { VSCodeEditor } from "@/components/editor/VSCodeEditor";
 import { Terminal } from "@/components/editor/Terminal";
 import { SearchPanel } from "@/components/editor/SearchPanel";
 import { GitPanel } from "@/components/editor/GitPanel";
@@ -301,14 +301,147 @@ export default function EditorPage() {
 
   return (
     <div className="flex h-screen bg-[#1E1E1E] overflow-hidden">
-      {/* VS Code Web Editor - Full Screen */}
-      <iframe
-        src="https://vscode.dev/"
-        className="w-full h-full border-0"
-        title="VS Code Editor"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-top-navigation-by-user-activation"
-        allow="clipboard-read; clipboard-write"
+      <CommandPalette
+        open={showCommandPalette}
+        onOpenChange={setShowCommandPalette}
+        onCommand={handleCommandPalette}
       />
+      {/* Activity Bar */}
+      <ActivityBar activeView={activeView} onViewChange={setActiveView} />
+
+      {/* Sidebar */}
+      {activeView === "explorer" && (
+        <div className="w-64 border-r border-[#3C3C3C]">
+          <FileTree
+            files={files}
+            selectedFileId={selectedFile?.id || null}
+            onFileSelect={handleFileSelect}
+            onCreateFile={handleCreateFile}
+            onCreateFolder={handleCreateFolder}
+            onDeleteNode={handleDeleteNode}
+          />
+        </div>
+      )}
+
+      {activeView === "search" && (
+        <SearchPanel onSearch={(query, options) => {
+          toast({
+            title: "Search",
+            description: `Searching for: ${query}`,
+          });
+        }} />
+      )}
+
+      {activeView === "git" && <GitPanel />}
+
+      {activeView === "run" && (
+        <RunPanel onRun={runCode} isRunning={isRunning} />
+      )}
+
+      {/* Main Editor Area */}
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Toolbar */}
+        <div className="h-9 bg-[#252526] border-b border-[#3C3C3C] flex items-center justify-between px-4">
+          <div className="text-sm text-[#E0E0E0]">
+            {selectedFile?.name || "No file open"}
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={saveProject} 
+              size="sm"
+              variant="ghost"
+              className="h-7 text-xs hover:bg-[#2A2A2A]"
+            >
+              <Save className="mr-1 h-3 w-3" />
+              Save
+            </Button>
+            <Button 
+              onClick={runCode} 
+              disabled={isRunning || !selectedFile || selectedFile.type !== "file"}
+              size="sm"
+              className="h-7 text-xs bg-primary hover:bg-primary/90"
+            >
+              {isRunning ? (
+                <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+              ) : (
+                <Play className="mr-1 h-3 w-3" />
+              )}
+              Run
+            </Button>
+          </div>
+        </div>
+
+        {/* Tab Bar */}
+        <TabBar
+          openFiles={openFiles}
+          activeFileId={selectedFile?.id || null}
+          onSelectFile={handleFileSelect}
+          onCloseFile={handleCloseFile}
+        />
+
+        {/* Breadcrumb */}
+        <Breadcrumb path={breadcrumbPath} />
+
+        {/* Editor */}
+        <div className="flex-1 overflow-hidden relative">
+          {showInlineAI && (
+            <InlineAIChat
+              onClose={() => setShowInlineAI(false)}
+              onInsertCode={(code) => {
+                if (selectedFile) {
+                  handleCodeChange(code);
+                }
+              }}
+              currentCode={selectedFile?.content}
+              language={selectedFile?.language}
+            />
+          )}
+          
+          {selectedFile?.type === "file" ? (
+            <VSCodeEditor
+              value={selectedFile.content || ""}
+              language={selectedFile.language || "plaintext"}
+              onChange={handleCodeChange}
+              onCursorChange={(line, column) => setCursorPosition({ line, column })}
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center text-[#9C9C9C] bg-[#1E1E1E]">
+              <div className="text-center">
+                <div className="text-6xl mb-4">👨‍💻</div>
+                <div className="text-xl mb-2">No file selected</div>
+                <div className="text-sm">Open a file from the Explorer to start coding</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Terminal Panel */}
+        <Terminal 
+          output={output}
+          isRunning={isRunning}
+          onCommand={handleTerminalCommand}
+        />
+
+          {/* Status Bar */}
+          <StatusBar
+            language={selectedFile?.language}
+            lineNumber={cursorPosition.line}
+            columnNumber={cursorPosition.column}
+            isRunning={isRunning}
+          />
+        </div>
+
+        {/* AI Assistant */}
+        {activeView === "ai" && (
+          <div className="w-96">
+            <AIAssistant
+              currentCode={selectedFile?.content}
+              language={selectedFile?.language}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
