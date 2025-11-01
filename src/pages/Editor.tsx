@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Play, Save, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,9 @@ import { SearchPanel } from "@/components/editor/SearchPanel";
 import { GitPanel } from "@/components/editor/GitPanel";
 import { RunPanel } from "@/components/editor/RunPanel";
 import { AIAssistant } from "@/components/editor/AIAssistant";
+import { CommandPalette } from "@/components/editor/CommandPalette";
+import { Breadcrumb } from "@/components/editor/Breadcrumb";
+import { InlineAIChat } from "@/components/editor/InlineAIChat";
 
 const defaultFiles: FileNode[] = [
   {
@@ -33,7 +36,34 @@ export default function EditorPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [activeView, setActiveView] = useState("explorer");
   const [cursorPosition, setCursorPosition] = useState({ line: 1, column: 1 });
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showInlineAI, setShowInlineAI] = useState(false);
   const { toast } = useToast();
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setShowCommandPalette(true);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "i") {
+        e.preventDefault();
+        setShowInlineAI(!showInlineAI);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
+        e.preventDefault();
+        saveProject();
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "r") {
+        e.preventDefault();
+        runCode();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showInlineAI]);
 
   const findNodeById = (nodes: FileNode[], id: string): FileNode | null => {
     for (const node of nodes) {
@@ -199,6 +229,31 @@ export default function EditorPage() {
     }
   };
 
+  const handleCommandPalette = (commandId: string) => {
+    switch (commandId) {
+      case "run":
+        runCode();
+        break;
+      case "save":
+        saveProject();
+        break;
+      case "ai":
+        setActiveView("ai");
+        break;
+      case "search":
+        setActiveView("search");
+        break;
+      case "new-file":
+        handleCreateFile(null, "untitled.txt", "plaintext");
+        break;
+      default:
+        toast({
+          title: "Command",
+          description: `Executed: ${commandId}`,
+        });
+    }
+  };
+
   const saveProject = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -242,8 +297,15 @@ export default function EditorPage() {
     }
   };
 
+  const breadcrumbPath = selectedFile?.name ? ["workspace", selectedFile.name] : ["workspace"];
+
   return (
     <div className="flex h-screen bg-[#1E1E1E] overflow-hidden">
+      <CommandPalette
+        open={showCommandPalette}
+        onOpenChange={setShowCommandPalette}
+        onCommand={handleCommandPalette}
+      />
       {/* Activity Bar */}
       <ActivityBar activeView={activeView} onViewChange={setActiveView} />
 
@@ -318,8 +380,24 @@ export default function EditorPage() {
           onCloseFile={handleCloseFile}
         />
 
+        {/* Breadcrumb */}
+        <Breadcrumb path={breadcrumbPath} />
+
         {/* Editor */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden relative">
+          {showInlineAI && (
+            <InlineAIChat
+              onClose={() => setShowInlineAI(false)}
+              onInsertCode={(code) => {
+                if (selectedFile) {
+                  handleCodeChange(code);
+                }
+              }}
+              currentCode={selectedFile?.content}
+              language={selectedFile?.language}
+            />
+          )}
+          
           {selectedFile?.type === "file" ? (
             <VSCodeEditor
               value={selectedFile.content || ""}
